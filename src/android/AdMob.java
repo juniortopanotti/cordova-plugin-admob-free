@@ -205,19 +205,32 @@ public class AdMob extends CordovaPlugin {
         return builder.build();
     }
 
+    @Override
+    public void onStop() {
+        if (interstitialExecutor != null) {
+            interstitialExecutor.setCanShowInterstitial(false);
+        }
+    }
 
     @Override
     public void onPause(boolean multitasking) {
-        if (bannerExecutor != null) {
-            bannerExecutor.pauseAd();
-        }
-        super.onPause(multitasking);
+      if (interstitialExecutor != null) {
+        interstitialExecutor.setCanShowInterstitial(false);
+      }
+      if (bannerExecutor != null) {
+        bannerExecutor.pauseAd();
+      }
+      super.onPause(multitasking);
     }
 
     @Override
     public void onResume(boolean multitasking) {
         super.onResume(multitasking);
-        isGpsAvailable = (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(cordova.getActivity()) == ConnectionResult.SUCCESS);
+        if (interstitialExecutor != null) {
+           interstitialExecutor.setCanShowInterstitial(true);
+        }
+        isGpsAvailable = (GoogleApiAvailability.getInstance()
+            .isGooglePlayServicesAvailable(cordova.getActivity()) == ConnectionResult.SUCCESS);
         if (bannerExecutor != null) {
             bannerExecutor.resumeAd();
         }
@@ -225,14 +238,16 @@ public class AdMob extends CordovaPlugin {
 
     @Override
     public void onDestroy() {
+        if (interstitialExecutor != null) {
+            interstitialExecutor.setCanShowInterstitial(false);
+            interstitialExecutor.destroy();
+            interstitialExecutor = null;
+        }
         if (bannerExecutor != null) {
             bannerExecutor.destroy();
             bannerExecutor = null;
         }
-        if (interstitialExecutor != null) {
-            interstitialExecutor.destroy();
-            interstitialExecutor = null;
-        }
+      
         if (rewardVideoExecutor != null) {
             rewardVideoExecutor.destroy();
             rewardVideoExecutor = null;

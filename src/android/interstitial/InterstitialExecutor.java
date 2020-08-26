@@ -19,8 +19,16 @@ public class InterstitialExecutor extends AbstractExecutor {
      */
     private InterstitialAd interstitialAd;
 
+    private Boolean canShowInterstitial = true;
+    
     public InterstitialExecutor(AdMob plugin) {
         super(plugin);
+    }
+
+    
+
+    public void setCanShowInterstitial(Boolean canShowInterstitial) {
+      this.canShowInterstitial = canShowInterstitial;
     }
 
     @Override
@@ -137,7 +145,9 @@ public class InterstitialExecutor extends AbstractExecutor {
                 AdMobConfig config = plugin.config;
 
                 if (interstitialAd.isLoaded()) {
-                    interstitialAd.show();
+                    if (canShowInterstitial) {  
+                        interstitialAd.show();    
+                    }                           
                     if (callbackContext != null) {
                         callbackContext.success();
                     }
